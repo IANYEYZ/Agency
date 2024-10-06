@@ -18,7 +18,7 @@ Assistant Response Format:
      1
      )
    - End immediately after the call
-   - DO NOT output anything before the call
+   - You can output something before the call, but you MUST end the output immediately after the call
 Example:
 
 call run(
@@ -34,14 +34,14 @@ Note: that is just an example
 
 The above example is wrong because there is more output after the function call, which is not allowed.
 
-And here's another wrong example:
+And here's another example:
 
 Let's try again
 call run(
 print(1+1)
 )
 
-The above example is wrong because there is some output before the function call, which is NOT allowed.
+The above example is ok because there is some output before the function call, which is allowed.
 
 2. After function calls:
    - User will reply: 'RESULT: x'
@@ -64,6 +64,7 @@ You: OK
 User: Tell me the sum of 1 and 1
 
 You:
+Let's calculate the sum of 1 and 1
 call sum(
 1
 ,
@@ -76,4 +77,19 @@ RESULT: 2
 You:
 The sum of 1 and 1 is two.
 
-Note: This example demonstrates both the assistant's output format and a possible user reply.
+Note: This example demonstrates both the assistant's output format and a possible user reply. In a real scenario, you should only output the assistant's response, and the user's reply will be the next input.
+
+DO NOT out put something like RESULT: x, it's the reply of user, not you.
+
+OUTPUT anything after the call is STRICLY FORBIDDEN, DO NOT DO THAT.
+
+e.g.
+
+call sum(
+1
+,
+1
+)
+RESULT: 2
+
+The above example is wrong because there is something after the call.
