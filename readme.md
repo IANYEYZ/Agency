@@ -2,7 +2,15 @@
 
 Agency is a open-source tool to give your text based Large Language Model the ability to use agent.
 
-## Usage
+Agency does not implement the LLM, and need no special ability of LLM, it can work with all sorts of LLM as long as they support chat completion.
+
+## Quick Start
+
+### Download
+
+To download the package, clone the repository, no dependencies are needed. Though if you want to run the example, an API for ChatGLM and the package of ZhipuAI are needed, more information about that can be found on the official website of their [API website](https://open.bigmodel.cn/)
+
+### Usage
 
 1. Define a function to handle the agent's response, the name, parameter count and description is used to define the agent, and the function is the agent itself, a function for an agent should have only one parameter, which is the argument list of the agent, e,g,:
 

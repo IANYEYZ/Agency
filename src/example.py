@@ -2,6 +2,10 @@
 
 from zhipuai import ZhipuAI
 from agency import Agency
+    
+import os
+import tempfile
+import subprocess
 
 messages = []
 
@@ -9,7 +13,7 @@ def add_message(role, content):
     messages.append({"role": role, "content": content})
 
 def get_response():
-    client = ZhipuAI(api_key='YOUR_API_KEY')
+    client = ZhipuAI(api_key='4d050a2bb0eaf43c93b1f205acc3df5d.dW1Oa7aLqq1MgTm4')
     response = client.chat.completions.create(
         model="glm-4",
         messages=messages,
@@ -17,52 +21,45 @@ def get_response():
     )
     return response.choices[0].message.content
 
-def Sum(code):
-    v1, v2 = int(code[0]), int(code[1])
-    print(v1, v2)
-    return v1 + v2
 
-num = 23
-def guess_num(code):
-    print(code[0])
-    if int(code[0]) == num:
-        return "correct!"
-    elif int(code[0]) < num:
-        return "too small"
-    else:
-        return "too big"
+def run(code):
+    code = code[0]
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as temp_file:
+            # Wrap the code to capture its result
+            wrapped_code = f"""
+import random
+result = eval('''{code}''')
+print(result)
+"""
+            temp_file.write(wrapped_code)
+            temp_file_path = temp_file.name
 
-word = "hello"
-def checkWordle(code):
-    print(code[0])
-    if len(code[0]) != 5:
-        return "wrong length"
-    guess = code[0].lower()
-    result = ['_'] * len(word)
-    word_chars = list(word)
-    
-    # First pass: check for correct letters in correct positions
-    for i in range(min(len(guess), len(word))):
-        if guess[i] == word[i]:
-            result[i] = guess[i].upper()
-            word_chars[i] = None
-    
-    # Second pass: check for correct letters in wrong positions
-    for i in range(min(len(guess), len(word))):
-        if result[i] == '_' and guess[i] in word_chars:
-            result[i] = guess[i].lower()
-            word_chars[word_chars.index(guess[i])] = None
-    
-    return ''.join(result)
+        # Run the temporary file and capture the output
+        result = subprocess.check_output(['python', temp_file_path], stderr=subprocess.STDOUT, universal_newlines=True)
 
-def hint(code):
-    code[0] = int(code[0])
-    return word[code[0]]
+        # Return the result
+        return result.strip()
 
-agent = Agency(get_response_fn=get_response, add_message=add_message)
-agent.add_agent("sum", "2", "add two numbers and the result is the sum", Sum)
-agent.add_agent("guess_num", "1", "guess a number, it'll return whether the guess is correct, too small or too big", guess_num)
-agent.add_agent("wordle", "1", "check the result of a wordle guess, it'll return the result of the guess, wrong length means the guess is not a five-letter word, _ means wrong character, uppercase means correct character in the correct position, lowercase means correct character in the wrong position", checkWordle)
-agent.add_agent("hint", "1", "return the character of the word at the index to give you a hint", hint)
-response = agent.get_response("Guess the word, you can use the function wordle to guess the word, the word should be a five-letter word, you can call the function as many times as you want, but tell me why you guess the word before call the function, keep guessing until you get the correct word, use hint to get the hint of the word, output the correct guess")
+    except subprocess.CalledProcessError as e:
+        return f"Error: {e.output.strip()}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+    finally:
+        # Delete the temporary file
+        if 'temp_file_path' in locals():
+            os.remove(temp_file_path)
+
+info = {"name": "Jack", "age": 20, "problem": "headache"}
+def getInfo(code):
+    code = code[0]
+    if not (code in info):
+        return "No information found"
+    return info[code]
+
+agent = Agency(get_response_fn=get_response, add_message=add_message, PROMPT="You are an assistant who wants to help the user with his problem, make sure to check problem use the function if you can, do not ask user if the information you want to know is knowable from the function")
+# agent.add_agent("run", "1", "run code and return the result, the only module imported is random", run)
+agent.add_agent("getInfo", "1", "get the information of the user, the only thing you can pass in is either name, age or problem", getInfo)
+response = agent.get_response("Hello! Not good here :(")
 print(response)
