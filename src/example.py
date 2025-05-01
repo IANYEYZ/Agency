@@ -53,13 +53,22 @@ print(result)
 
 info = {"name": "Jack", "age": 20, "problem": "headache"}
 def getInfo(code):
-    code = code[0]
     if not (code in info):
         return "No information found"
     return info[code]
 
-agent = Agency(get_response_fn=get_response, add_message=add_message, PROMPT="You are an assistant who wants to help the user with his problem, make sure to check problem use the function if you can, do not ask user if the information you want to know is knowable from the function")
+num = 71
+def guess(numGuessed):
+    if numGuessed > num:
+        return "Too Big"
+    elif numGuessed < num:
+        return "Too Small"
+    else:
+        return "You Get it!"
+
+agent = Agency(get_response_fn=get_response, add_message=add_message, PROMPT="Guess a number between 1 and 100, call function to check")
 # agent.add_agent("run", "1", "run code and return the result, the only module imported is random", run)
-agent.add_agent("getInfo", "1", "get the information of the user, the only thing you can pass in is either name, age or problem", getInfo)
-response = agent.get_response("Hello! Not good here :(")
+# agent.add_agent("getInfo", "1", "get the information of the user, the only thing you can pass in is either name, age or problem", getInfo)
+agent.add_agent("guess", "1", "guess a number and it'll tell you it's correct, too big or too small, pass the parameter as a number", guess)
+response = agent.get_response_new("Hello")
 print(response)
